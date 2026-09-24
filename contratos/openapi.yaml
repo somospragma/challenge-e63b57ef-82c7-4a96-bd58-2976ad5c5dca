@@ -1,0 +1,241 @@
+openapi: 3.1.0
+info:
+  title: APIs del Sistema Pragma
+  description: |-
+    Documentación de las APIs del sistema Pragma para evaluación de madurez.
+    Incluye endpoints para gestión de reglas, autenticación y notificaciones.
+  version: 1.0.0
+servers:
+  - url: https://api.pragma.com/v1
+    description: Servidor de producción
+paths:
+  /rules/evaluate:
+    post:
+      summary: Evalúa una regla de negocio
+      description: |-
+        Recibe los parámetros de una regla y retorna el resultado de su evaluación.
+        Requiere autenticación y permisos sobre el dominio de reglas.
+      operationId: evaluateRule
+      tags:
+        - Rules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleEvaluationRequest'
+            examples:
+              example1:
+                value:
+                  ruleId: "rule-123"
+                  parameters:
+                    userId: "user-456"
+                    context:
+                      riskLevel: "high"
+      responses:
+        '200':
+          description: Resultado de la evaluación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleEvaluationResponse'
+              examples:
+                example1:
+                  value:
+                    result: "approved"
+                    details:
+                      score: 85
+                      threshold: 70
+        '401':
+          description: No autorizado
+        '403':
+          description: Prohibido
+        '500':
+          description: Error interno del servidor
+
+  /auth/token:
+    post:
+      summary: Genera un token de autenticación
+      description: |-
+        Genera un token JWT para autenticación en los endpoints protegidos.
+        Requiere credenciales válidas.
+      operationId: generateToken
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+            examples:
+              example1:
+                value:
+                  clientId: "client-789"
+                  clientSecret: "secret-abc"
+      responses:
+        '200':
+          description: Token generado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                example1:
+                  value:
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    expiresIn: 3600
+        '401':
+          description: Credenciales inválidas
+        '500':
+          description: Error interno del servidor
+
+  /notifications/send:
+    post:
+      summary: Envía una notificación
+      description: |-
+        Envía una notificación a un usuario específico.
+        Requiere autenticación y permisos para enviar notificaciones.
+      operationId: sendNotification
+      tags:
+        - Notifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+            examples:
+              example1:
+                value:
+                  userId: "user-456"
+                  message: "Tu evaluación de riesgo ha sido aprobada."
+                  channel: "email"
+      responses:
+        '200':
+          description: Notificación enviada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationResponse'
+              examples:
+                example1:
+                  value:
+                    status: "sent"
+                    notificationId: "notif-789"
+        '401':
+          description: No autorizado
+        '403':
+          description: Prohibido
+        '500':
+          description: Error interno del servidor
+
+components:
+  schemas:
+    RuleEvaluationRequest:
+      type: object
+      properties:
+        ruleId:
+          type: string
+          description: Identificador de la regla
+          example: "rule-123"
+        parameters:
+          type: object
+          additionalProperties: true
+          description: Parámetros para la evaluación de la regla
+          example:
+            userId: "user-456"
+            context:
+              riskLevel: "high"
+      required:
+        - ruleId
+        - parameters
+
+    RuleEvaluationResponse:
+      type: object
+      properties:
+        result:
+          type: string
+          description: Resultado de la evaluación
+          example: "approved"
+        details:
+          type: object
+          properties:
+            score:
+              type: number
+              description: Puntuación de la evaluación
+              example: 85
+            threshold:
+              type: number
+              description: Umbral para aprobación
+              example: 70
+          required:
+            - score
+            - threshold
+      required:
+        - result
+
+    AuthRequest:
+      type: object
+      properties:
+        clientId:
+          type: string
+          description: Identificador del cliente
+          example: "client-789"
+        clientSecret:
+          type: string
+          description: Secreto del cliente
+          example: "secret-abc"
+      required:
+        - clientId
+        - clientSecret
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT generado
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expiresIn:
+          type: integer
+          description: Tiempo de expiración en segundos
+          example: 3600
+      required:
+        - token
+        - expiresIn
+
+    NotificationRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: Identificador del usuario
+          example: "user-456"
+        message:
+          type: string
+          description: Mensaje de la notificación
+          example: "Tu evaluación de riesgo ha sido aprobada."
+        channel:
+          type: string
+          description: Canal de notificación
+          enum: ["email", "sms", "push"]
+          example: "email"
+      required:
+        - userId
+        - message
+        - channel
+
+    NotificationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Estado de la notificación
+          example: "sent"
+        notificationId:
+          type: string
+          description: Identificador de la notificación
+          example: "notif-789"
+      required:
+        - status

@@ -1,0 +1,38 @@
+```mermaid
+C4Context
+    title Contexto del Sistema de Evaluación y Mejora de APIs
+    
+    Boundary(b0, "Organización", "") {
+        Person(arquitecto, "Arquitecto de Soluciones", "Define estándares y evalúa madurez de APIs")
+        Person(liderTecnico, "Líder Técnico", "Implementa mejoras en APIs")
+        Person(gerente, "Gerente de Producto", "Prioriza iniciativas de mejora")
+        
+        System(sistemaEvaluacion, "Sistema de Evaluación de APIs", "Evalúa madurez de APIs según Modelo de Madurez de Pragma y genera propuestas de mejora")
+        
+        SystemDb(database, "Base de Datos de APIs", "Almacena catálogo de APIs, resultados de evaluación y propuestas")
+    }
+    
+    Boundary(b1, "Ecosistema Externo", "") {
+        System_Ext(apiGateway, "API Gateway", "Expone APIs para consumo interno/externo")
+        System_Ext(monitoring, "Sistema de Monitoreo", "Supervisa disponibilidad y rendimiento de APIs")
+        System_Ext(documentationPortal, "Portal de Documentación", "Centraliza documentación de APIs")
+    }
+    
+    Rel(arquitecto, sistemaEvaluacion, "Usa", "HTTPS")
+    Rel(liderTecnico, sistemaEvaluacion, "Consulta y aplica", "HTTPS")
+    Rel(gerente, sistemaEvaluacion, "Revisa", "HTTPS")
+    Rel(sistemaEvaluacion, database, "Almacena/consulta", "SQL")
+    
+    Rel(sistemaEvaluacion, apiGateway, "Evalúa madurez", "OpenAPI")
+    Rel(sistemaEvaluacion, monitoring, "Consulta métricas", "Prometheus")
+    Rel(sistemaEvaluacion, documentationPortal, "Valida documentación", "HTTPS")
+    
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="2")
+```
+
+---
+**Notas sobre el diagrama de contexto:**
+- Representa los actores principales y sistemas externos con los que interactúa el Sistema de Evaluación de APIs.
+- Las relaciones muestran los flujos de información principales entre componentes.
+- Se alinea con los ADRs 001-004 y los atributos de calidad definidos en `atributos-de-calidad.md`.
+- Este diagrama es la base para los diagramas de contenedores y componentes (no incluidos en este lote).
